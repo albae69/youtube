@@ -1,114 +1,89 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
-
-import React from 'react';
+import React, {useState} from 'react';
 import {
-  SafeAreaView,
   StyleSheet,
-  ScrollView,
-  View,
   Text,
-  StatusBar,
+  View,
+  Image,
+  TouchableOpacity,
+  ToastAndroid,
 } from 'react-native';
+import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const App = () => {
+  const [state, setState] = useState({
+    photo: '',
+  });
 
-const App: () => React$Node = () => {
+  const option = {
+    mediaType: 'photo',
+    quality: 1,
+    saveToPhotos: true,
+  };
+
+  const toast = (msg) => {
+    ToastAndroid.show(msg, ToastAndroid.SHORT);
+  };
+
+  const openCamera = () => {
+    launchCamera(option, (res) => {
+      if (res.didCancel) {
+        toast('take a picture canceled');
+      } else if (res.errorCode) {
+        toast('error while open camera', res.errorCode);
+      } else {
+        setState({photo: res.uri});
+      }
+    });
+  };
+
+  const openGallery = () => {
+    launchImageLibrary(option, (res) => {
+      if (res.didCancel) {
+        toast('gallery open canceled');
+      } else if (res.errorCode) {
+        toast('error while open camera', res.errorCode);
+      } else {
+        setState({photo: res.uri});
+      }
+    });
+  };
+
   return (
-    <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </>
+    <View style={styles.container}>
+      {state.photo == '' ? (
+        <Text>No Image</Text>
+      ) : (
+        <Image source={{uri: state.photo}} style={styles.image} />
+      )}
+      <View style={styles.wrapBtn}>
+        <TouchableOpacity onPress={openCamera}>
+          <Text>Open Camera</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={openGallery}>
+          <Text>Open Galerry</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 };
 
+export default App;
+
 const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white',
   },
-  engine: {
-    position: 'absolute',
-    right: 0,
+  wrapBtn: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: 200,
+    marginTop: 50,
   },
-  body: {
-    backgroundColor: Colors.white,
-  },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
+  image: {
+    height: 250,
+    width: 250,
   },
 });
-
-export default App;
