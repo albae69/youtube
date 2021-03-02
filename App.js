@@ -1,114 +1,136 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
-
-import React from 'react';
+import React, {useState} from 'react';
 import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
   View,
   Text,
-  StatusBar,
+  TouchableOpacity,
+  FlatList,
+  StyleSheet,
+  TextInput,
+  Keyboard,
 } from 'react-native';
 
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const App = () => {
+  const [data, setData] = useState([
+    {
+      id: 1,
+      bookName: 'Harry Potter',
+    },
+    {
+      id: 2,
+      bookName: 'Harry Potter 2',
+    },
+    {
+      id: 3,
+      bookName: 'Harry Potter 3',
+    },
+  ]);
+  const [edit, setEdit] = useState(false);
+  const [form, setForm] = useState({id: '', bookName: ''});
+  const [text, setText] = useState('');
 
-const App: () => React$Node = () => {
+  const Card = ({item}) => {
+    return (
+      <TouchableOpacity style={styles.card} onPress={() => editData(item)}>
+        <Text>{item.bookName}</Text>
+        <TouchableOpacity onPress={() => deleteData(item.id)}>
+          <Text>Delete</Text>
+        </TouchableOpacity>
+      </TouchableOpacity>
+    );
+  };
+
+  const createData = () => {
+    const datas = {id: data.length + 1, bookName: text};
+    setData(data.concat(datas));
+    setText('');
+    Keyboard.dismiss();
+  };
+
+  const editData = (item) => {
+    setEdit(true);
+    setText(item.bookName);
+    setForm(item);
+  };
+
+  const editTheData = () => {
+    const datas = {id: form.id, bookName: text};
+    const newDataUpdated = data.filter((item) => item.id !== form.id);
+    setData(newDataUpdated.concat(datas));
+  };
+
+  const deleteData = (id) => {
+    const datas = data.filter((item) => item.id !== id);
+    setData(datas);
+  };
+
   return (
-    <>
-      <StatusBar barStyle="dark-content" />
-      <SafeAreaView>
-        <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
-          <View style={styles.body}>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
-              <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </>
+    <View style={styles.container}>
+      <FlatList
+        contentContainerStyle={styles.flatList}
+        data={data}
+        renderItem={({item}) => <Card item={item} />}
+        keyExtractor={(item) => item.id.toString()}
+      />
+
+      <View>
+        <View style={styles.input}>
+          <TextInput
+            placeholder="input.."
+            value={text}
+            onChangeText={(value) => setText(value)}
+          />
+        </View>
+        <TouchableOpacity
+          style={styles.btn}
+          onPress={() => (edit ? editTheData() : createData())}>
+          <Text style={styles.btnTitle}>{edit ? 'EDIT' : 'ADD'}</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 };
 
+export default App;
+
 const styles = StyleSheet.create({
-  scrollView: {
-    backgroundColor: Colors.lighter,
+  container: {
+    flex: 1,
+    backgroundColor: 'white',
+    padding: 22,
   },
-  engine: {
-    position: 'absolute',
-    right: 0,
+  flatList: {
+    marginBottom: 50,
+    flex: 1,
   },
-  body: {
-    backgroundColor: Colors.white,
+  card: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 10,
+    backgroundColor: 'white',
+    elevation: 5,
+    height: 100,
+    borderRadius: 5,
+    padding: 16,
   },
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  input: {
+    height: 50,
+    borderRadius: 8,
+    backgroundColor: 'white',
+    elevation: 5,
+    paddingLeft: 16,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: Colors.black,
+  btn: {
+    height: 50,
+    borderRadius: 8,
+    backgroundColor: 'blue',
+    elevation: 5,
+    marginTop: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.dark,
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
-    fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
+  btnTitle: {
+    fontSize: 16,
+    color: 'white',
   },
 });
-
-export default App;
